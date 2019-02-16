@@ -4,7 +4,6 @@
  (only-in rackunit require/expose)
  racket/runtime-path
  scribble/core
- scribble/base
  scribble/latex-properties
  scribble/html-properties
  racket/function
@@ -12,11 +11,6 @@
  racket/port
  racket/list
  racket/string
- scribble/base-render
- (rename-in
-  scribble/html-render
-  (render-mixin html:render-mixin)
-  (render-multi-mixin multi-html:render-mixin))
  racket/class
  (only-in xml cdata))
 
