@@ -11,8 +11,11 @@ This mixin supports the LaTeX, PDF, and HTML backends.
 I have not thoroughly tested this.
 
 ## Example
+
+Put the following in `meow.scrbl`.
 ```racket
-(require scribble/minted)
+#lang scribble/base
+@(require scribble/minted)
 
 @title{Ohh pretty}
 @minted["coq"]{
@@ -24,5 +27,14 @@ Inductive Vec {A : Set} : nat -> Set :=
 This is a Coq expression @mintinline["coq"]{cons 0 nil}.
 ```
 
+Run `scribble`, with multiple backends.
+
+`scribble --pdf meow.scrbl`
+`scribble --html meow.scrbl`
+
+See pretty code!
+
 ## Install
 `raco pkg install scribble-minted`
+
+You must have `pygmentize` installed and in your `PATH`.

@@ -59,6 +59,8 @@
     (inherit/super current-render-mode)
     (inherit-field dest-dir style-extra-files)
 
+    (define dir-prefix (or dest-dir "."))
+
     (define-values (pygmentize-format pygmentize-style-file-suffix pygmentize-outputer)
       (case (super current-render-mode)
         [((latex) (pdf))
@@ -99,10 +101,10 @@
              ri)))]
         [else (error "Not sure how to mint-ify the renderer for" (super current-render-mode))]))
 
-    (set-field! style-extra-files this (cons (format "~a/minted-style~a" dest-dir pygmentize-style-file-suffix) style-extra-files ))
+    (set-field! style-extra-files this (cons (format "~a/minted-style~a" dir-prefix pygmentize-style-file-suffix) style-extra-files ))
 
     ;; setup style files in the dest-dir
-    (define pygmentize-style-file (format "~a/minted-style~a" dest-dir pygmentize-style-file-suffix))
+    (define pygmentize-style-file (format "~a/minted-style~a" dir-prefix pygmentize-style-file-suffix))
     (unless (file-exists? pygmentize-style-file)
       (with-output-to-file pygmentize-style-file
         (thunk
