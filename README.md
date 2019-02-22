@@ -18,7 +18,7 @@ Put the following in `meow.scrbl`.
 @(require scribble/minted)
 
 @title{Ohh pretty}
-@minted["coq"]{
+@minted["coq" #:options '((linenos . true))]{
 Inductive Vec {A : Set} : nat -> Set :=
 | nil : Vec 0
 | cons : forall {n:nat}, A -> Vec n -> Vec (1 + n).
