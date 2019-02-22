@@ -63,6 +63,7 @@
           ".tex"
           (lambda (s x part ri)
             (printf
+             ; TODO Should be handled by options to pygmentize
              (if (equal? (style-name s) "ScrbMintInline")
                  (string-replace x "Verbatim" "BVerbatim")
                  x))
@@ -81,6 +82,8 @@
                 (xexpr-property
                  (cdata #f #f (if (equal? (style-name s) "ScrbMintInline")
                                   ; NB: Determined experimentally to fixup inline output.
+                                  ; TODO: Some of these needs to be optional (string-normalize-spaces)
+                                  ; Some of should be handled by options to pygmentize (removing <pre>)
                                   (for/fold ([x (string-normalize-spaces x)])
                                             ([replacer `(("<pre>" "")
                                                           ("</pre>" "")
@@ -117,12 +120,17 @@
              (thunk
               (with-input-from-string (apply string-append (element-content i))
                 (thunk
-                 (system*-maybe
+                 (define options (cdr (assoc 'mt-options (style-properties (element-style i)))))
+                 (apply
+                  system*-maybe
                   pygmentize-bin
                   "-l"
                   (cdr (assoc 'lang (style-properties (element-style i))))
                   "-f"
-                  pygmentize-format)))))
+                  pygmentize-format
+                  (for/fold ([ls '()])
+                            ([p options])
+                    (list* "-O" (format "~a=~a" (car p) (cdr p)) ls)))))))
            part ri)
           (super render-content i part ri)))))
 
@@ -143,14 +151,14 @@
       (lang . ,lang)))
    #;(command-extras (list lang))))
 
-(define (minted lang . code)
+(define (minted lang #:options [options '()] . code)
   (element
    (make-style "ScrbMint"
-               (cons `(lang . ,lang) minted-style-props))
+               (list* `(lang . ,lang) `(mt-options . ,options) minted-style-props))
    code))
 
-(define (mintinline lang . code)
+(define (mintinline lang #:options [options '()] . code)
   (element
    (make-style "ScrbMintInline"
-               (cons `(lang . ,lang) minted-style-props))
+               (list* `(lang . ,lang) `(mt-options . ,options) minted-style-props))
    code))
