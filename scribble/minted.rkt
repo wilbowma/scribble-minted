@@ -62,11 +62,7 @@
           "latex"
           ".tex"
           (lambda (s x part ri)
-            (printf
-             ; TODO Should be handled by options to pygmentize
-             (if (equal? (style-name s) "ScrbMintInline")
-                 (string-replace x "Verbatim" "BVerbatim")
-                 x))
+            (printf x)
             null))]
         [((html))
          (values
@@ -81,16 +77,15 @@
                (list
                 (xexpr-property
                  (cdata #f #f (if (equal? (style-name s) "ScrbMintInline")
-                                  ; NB: Determined experimentally to fixup inline output.
-                                  ; TODO: Some of these needs to be optional (string-normalize-spaces)
-                                  ; Some of should be handled by options to pygmentize (removing <pre>)
-                                  (for/fold ([x (string-normalize-spaces x)])
-                                            ([replacer `(("<pre>" "")
-                                                          ("</pre>" "")
-                                                          ("highlight" "highlight-inline")
-                                                          ("div" "code")
-                                                          (" </code>" "</code>"))])
-                                    (string-replace x (first replacer) (second replacer)))
+                                  ;; NB: Inline is not wrapped from pygments to avoid extra paragraphs.
+                                  ;; Instead, wrap it code manually.
+                                  ;; Would prefer to use <pre>, but this seems
+                                  ;; to prevent Scribble from folding it into the previous paragraph.
+                                  ;; Instead, highlight-inline asks CSS to do white-space: pre.
+                                  ;; Not sure how compatible this is with older browsers
+                                  (format "<code class=\"highlight-inline\">~a</code>"
+                                          ;; Remove trailing <br /> for inline
+                                          (string-trim x "<br />" #:left? #f))
                                   x))
                  (cdata #f #f ""))))
               "")
@@ -157,8 +152,24 @@
                (list* `(lang . ,lang) `(mt-options . ,options) minted-style-props))
    code))
 
+;; TODO: Probably want some intermediate between inline and minted that allows
+;; boxed, but in a scenario where the caller has control over the preceding
+;; paragraph and thus can "fix up" the paragraph I'm trying to avoid with some
+;; of the inline formatting.
+(define inline-options
+  '((envname . "BVerbatim")
+    (cssclass . "highlight-inline")
+    (lineseparator . "<br />")
+    ;; NB: The default is baseline=b, but this works badly in nested flows,
+    ;; which are the default scribble composition?
+    (verboptions . "baseline=t")
+    (nowrap . "True")
+    ))
+
 (define (mintinline lang #:options [options '()] . code)
   (element
    (make-style "ScrbMintInline"
-               (list* `(lang . ,lang) `(mt-options . ,options) minted-style-props))
+               (list* `(lang . ,lang)
+                      `(mt-options . ,(append inline-options options))
+                      minted-style-props))
    code))

@@ -1,3 +1,5 @@
 .highlight-inline {
     display: inline;
+    margin: 0em;
+    white-space: pre;
 }
