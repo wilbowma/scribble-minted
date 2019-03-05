@@ -40,6 +40,11 @@
         (error (format "Error running ~a, which returned the error code" bin) res)
         res)))
 
+(define (maybe-assoc key als)
+  (findf (lambda (x)
+           (and (pair? x) (equal? (car x) key)))
+         als))
+
 (define (minted-render-mixin %)
   (class %
     (super-new)
@@ -115,12 +120,12 @@
              (thunk
               (with-input-from-string (apply string-append (element-content i))
                 (thunk
-                 (define options (cdr (assoc 'mt-options (style-properties (element-style i)))))
+                 (define options (cdr (maybe-assoc 'mt-options (style-properties (element-style i)))))
                  (apply
                   system*-maybe
                   pygmentize-bin
                   "-l"
-                  (cdr (assoc 'lang (style-properties (element-style i))))
+                  (cdr (maybe-assoc 'lang (style-properties (element-style i))))
                   "-f"
                   pygmentize-format
                   (for/fold ([ls '()])
