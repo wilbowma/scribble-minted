@@ -108,31 +108,40 @@
          (system*-maybe pygmentize-bin "-S" "default" "-f" pygmentize-format))))
 
     (define/override (render-content i part ri)
-      (if (and (element? i)
-               (let ([s (element-style i)])
-                 (and (style? s)
-                      (or
-                       (equal? (style-name s) "ScrbMintInline")
-                       (equal? (style-name s) "ScrbMint")))))
-          (pygmentize-outputer
-           (element-style i)
-           (with-output-to-string
+      (define (pygmentize str i)
+        (with-output-to-string
+          (thunk
+           (with-input-from-string str
              (thunk
-              (with-input-from-string (apply string-append (element-content i))
-                (thunk
-                 (define options (cdr (maybe-assoc 'mt-options (style-properties (element-style i)))))
-                 (apply
-                  system*-maybe
-                  pygmentize-bin
-                  "-l"
-                  (cdr (maybe-assoc 'lang (style-properties (element-style i))))
-                  "-f"
-                  pygmentize-format
-                  (for/fold ([ls '()])
-                            ([p options])
-                    (list* "-O" (format "~a=~a" (car p) (cdr p)) ls)))))))
-           part ri)
-          (super render-content i part ri)))))
+              (define options (cdr (maybe-assoc 'mt-options (style-properties (element-style i)))))
+              (apply
+               system*-maybe
+               pygmentize-bin
+               "-l"
+               (cdr (maybe-assoc 'lang (style-properties (element-style i))))
+               "-f"
+               pygmentize-format
+               (for/fold ([ls '()])
+                         ([p options])
+                 (list* "-O" (format "~a=~a" (car p) (cdr p)) ls))))))))
+      (let loop ([i i])
+        (if (and (element? i)
+                 (let ([s (element-style i)])
+                   (and (style? s)
+                        (or
+                         (equal? (style-name s) "ScrbMintInline")
+                         (equal? (style-name s) "ScrbMint")))))
+            (for/fold ([ls '()])
+                      ([c (element-content i)])
+              (if (string? c)
+                  (append
+                   ls
+                   (pygmentize-outputer
+                    (element-style i)
+                    (pygmentize (content->string c) i)
+                    part ri))
+                  (append ls (loop c))))
+            (super render-content i part ri))))))
 
 ; NB: Relies on implementation details of scribble/run.rkt
 ; including order of evaluation, behavior of dynamic require
