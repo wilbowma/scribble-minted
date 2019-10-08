@@ -3,6 +3,7 @@
 (require
  (only-in rackunit require/expose)
  racket/runtime-path
+ scribble/base
  scribble/core
  scribble/latex-properties
  scribble/html-properties
