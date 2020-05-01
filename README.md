@@ -18,6 +18,10 @@ Put the following in `meow.scrbl`.
 @(require scribble/minted)
 
 @title{Ohh pretty}
+@; Specify new default style
+@(current-pygmentize-default-style 'colorful)
+
+@; Or specify style as an option (not actually locally scoped, though)
 @minted["coq" #:options '((linenos . true) (style . colorful)]{
 Inductive Vec {A : Set} : nat -> Set :=
 | nil : Vec 0
@@ -45,3 +49,5 @@ Note that the `style` option affects the style of everything typeset in the
 page due to limitations in Pygmentize.
 I'll eventually work around this to make it scoped to `@minted` call, allowing
 multiple styles in the same document.
+I recommend you avoid it and just use `current-pygmentize-default-style` for
+now.

@@ -20,13 +20,16 @@
  minted
  mintinline
  minted-render-mixin
- current-pygmentize-path)
+ current-pygmentize-path
+ current-pygmentize-default-style)
 
 (define-runtime-path minted-tex-path "minted.tex")
 (define-runtime-path minted-css-path "minted.css")
 
 ;; Default value #f means "try to find the path and error if not found".
 (define current-pygmentize-path (make-parameter #f))
+
+(define current-pygmentize-default-style (make-parameter 'default))
 
 (define (system*-maybe bin . args)
   (let ([res (apply system*/exit-code bin args)])
@@ -108,7 +111,7 @@
         (let* ([options (cdr (maybe-assoc 'mt-options (style-properties (element-style i))))]
                [style (cond
                         [(maybe-assoc 'style options) => cdr]
-                        [else 'default])]
+                        [else (current-pygmentize-default-style)])]
                [pygmentize-style-file
                 (format "~a/minted-~a-style~a"
                         dir-prefix
