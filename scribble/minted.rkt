@@ -25,12 +25,6 @@
 (define-runtime-path minted-tex-path "minted.tex")
 (define-runtime-path minted-css-path "minted.css")
 
-;; These can only be used if the mixin is called after the parameters are set.
-
-;; These are relative paths, not runtime paths
-(define minted-tex-style-path "minted-style.tex")
-(define minted-css-style-path "minted-style.css")
-
 ;; Default value #f means "try to find the path and error if not found".
 (define current-pygmentize-path (make-parameter #f))
 
@@ -98,14 +92,38 @@
              ri)))]
         [else (error "Not sure how to mint-ify the renderer for" (super current-render-mode))]))
 
-    (set-field! style-extra-files this (cons (format "~a/minted-style~a" dir-prefix pygmentize-style-file-suffix) style-extra-files ))
-
-    ;; setup style files in the dest-dir
-    (define pygmentize-style-file (format "~a/minted-style~a" dir-prefix pygmentize-style-file-suffix))
-    (unless (file-exists? pygmentize-style-file)
-      (with-output-to-file pygmentize-style-file
-        (thunk
-         (system*-maybe pygmentize-bin "-S" "default" "-f" pygmentize-format))))
+    ; NOTE: Has support for multiple styles in a single document, but pygmentize
+    ; doesn't support this natively as it reuses names.
+    ; Could manually rewrite the generate CSS to add some kind of scopeing using
+    ; spans, e.g., by prefixing each of the generated classes, and adding the
+    ; prefix to the generated span/div.
+    ; This only works for html output, though.
+    (define/override (traverse-content i fp)
+      (when (and (element? i)
+                 (let ([s (element-style i)])
+                   (and (style? s)
+                        (or
+                         (equal? (style-name s) "ScrbMintInline")
+                         (equal? (style-name s) "ScrbMint")))))
+        (let* ([options (cdr (maybe-assoc 'mt-options (style-properties (element-style i))))]
+               [style (cond
+                        [(maybe-assoc 'style options) => cdr]
+                        [else 'default])]
+               [pygmentize-style-file
+                (format "~a/minted-~a-style~a"
+                        dir-prefix
+                        style
+                        pygmentize-style-file-suffix)])
+          (set-field! style-extra-files this
+                      (cons pygmentize-style-file style-extra-files))
+          ;; setup style files in the dest-dir
+          (unless (file-exists? pygmentize-style-file)
+            (with-output-to-file pygmentize-style-file
+              (thunk
+               ; format is polymorphic to-string
+               (system*-maybe pygmentize-bin "-S" (format "~a" style) "-f"
+                              pygmentize-format))))))
+      (super traverse-content i fp))
 
     (define/override (render-content i part ri)
       (if (and (element? i)
@@ -114,24 +132,26 @@
                       (or
                        (equal? (style-name s) "ScrbMintInline")
                        (equal? (style-name s) "ScrbMint")))))
-          (pygmentize-outputer
-           (element-style i)
-           (with-output-to-string
-             (thunk
-              (with-input-from-string (apply string-append (element-content i))
-                (thunk
-                 (define options (cdr (maybe-assoc 'mt-options (style-properties (element-style i)))))
-                 (apply
-                  system*-maybe
-                  pygmentize-bin
-                  "-l"
-                  (cdr (maybe-assoc 'lang (style-properties (element-style i))))
-                  "-f"
-                  pygmentize-format
-                  (for/fold ([ls '()])
-                            ([p options])
-                    (list* "-O" (format "~a=~a" (car p) (cdr p)) ls)))))))
-           part ri)
+          ; Generate style file style specified by i, or default, if style file
+          ; doesn't exist.
+          (let* ([options (cdr (maybe-assoc 'mt-options (style-properties (element-style i))))])
+            (pygmentize-outputer
+             (element-style i)
+             (with-output-to-string
+               (thunk
+                (with-input-from-string (apply string-append (element-content i))
+                  (thunk
+                   (apply
+                    system*-maybe
+                    pygmentize-bin
+                    "-l"
+                    (cdr (maybe-assoc 'lang (style-properties (element-style i))))
+                    "-f"
+                    pygmentize-format
+                    (for/fold ([ls '()])
+                              ([p options])
+                      (list* "-O" (format "~a=~a" (car p) (cdr p)) ls)))))))
+             part ri))
           (super render-content i part ri)))))
 
 ; NB: Relies on implementation details of scribble/run.rkt
