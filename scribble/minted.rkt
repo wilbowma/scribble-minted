@@ -164,20 +164,30 @@
   (current-render-mixin (lambda (%) (minted-render-mixin (old %)))))
 
 (define minted-style-props
-  (list
-   #;(make-css-addition minted-css-style-path)
-   #;(make-tex-addition minted-tex-style-path)
-   (make-css-addition minted-css-path)
-   (make-tex-addition minted-tex-path)
-   #;(attributes
-    `((type . ,(format "text/minted"))
-      (lang . ,lang)))
-   #;(command-extras (list lang))))
+  ;; NOTE: These css/tex additions should only be added to the page once. As
+  ;; CSS, it doesn't really hurt anything if they're added more than once, but
+  ;; clutters the HTML and consumes space and bandwidth.
+  ;; I figured scribble automatically deduplicated these, but apparently not.
+  (let ([do-once (box #t)])
+    (lambda ()
+      (if (unbox do-once)
+          (begin
+            (set-box! do-once #f)
+            (list
+             #;(make-css-addition minted-css-style-path)
+             #;(make-tex-addition minted-tex-style-path)
+             (make-css-addition minted-css-path)
+             (make-tex-addition minted-tex-path)
+             #;(attributes
+                `((type . ,(format "text/minted"))
+                  (lang . ,lang)))
+             #;(command-extras (list lang))))
+          '()))))
 
 (define (minted lang #:options [options '()] . code)
   (element
    (make-style "ScrbMint"
-               (list* `(lang . ,lang) `(mt-options . ,options) minted-style-props))
+               (list* `(lang . ,lang) `(mt-options . ,options) (minted-style-props)))
    code))
 
 ;; TODO: Probably want some intermediate between inline and minted that allows
@@ -199,5 +209,5 @@
    (make-style "ScrbMintInline"
                (list* `(lang . ,lang)
                       `(mt-options . ,(append inline-options options))
-                      minted-style-props))
+                      (minted-style-props)))
    code))
