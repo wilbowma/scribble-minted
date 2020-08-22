@@ -60,6 +60,8 @@
     (define-values (pygmentize-format pygmentize-style-file-suffix pygmentize-outputer)
       (case (super current-render-mode)
         [((latex) (pdf))
+         (set-field! style-extra-files this
+                     (cons minted-tex-path style-extra-files))
          (values
           "latex"
           ".tex"
@@ -67,6 +69,8 @@
             (printf x)
             null))]
         [((html))
+         (set-field! style-extra-files this
+                     (cons minted-css-path style-extra-files))
          (values
           "html"
           ".css"
@@ -117,8 +121,9 @@
                         dir-prefix
                         style
                         pygmentize-style-file-suffix)])
-          (set-field! style-extra-files this
-                      (cons pygmentize-style-file style-extra-files))
+          (unless (member pygmentize-style-file style-extra-files)
+            (set-field! style-extra-files this
+                        (cons pygmentize-style-file style-extra-files)))
           ;; setup style files in the dest-dir
           (unless (file-exists? pygmentize-style-file)
             (with-output-to-file pygmentize-style-file
@@ -163,6 +168,7 @@
 (let ([old (current-render-mixin)])
   (current-render-mixin (lambda (%) (minted-render-mixin (old %)))))
 
+;; Not needed at all any more, I think.
 (define minted-style-props
   ;; NOTE: These css/tex additions should only be added to the page once. As
   ;; CSS, it doesn't really hurt anything if they're added more than once, but
@@ -176,8 +182,8 @@
             (list
              #;(make-css-addition minted-css-style-path)
              #;(make-tex-addition minted-tex-style-path)
-             (make-css-addition minted-css-path)
-             (make-tex-addition minted-tex-path)
+             #;(make-css-addition minted-css-path)
+             #;(make-tex-addition minted-tex-path)
              #;(attributes
                 `((type . ,(format "text/minted"))
                   (lang . ,lang)))
