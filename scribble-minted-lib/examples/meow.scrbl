@@ -45,3 +45,11 @@ A colorful Racket
     (displayln "Hello world")
     (loop (add1 n))))
 }
+
+A @racket[racketblock] for comparison
+@racketblock[
+(begin
+  (let loop ([n 0])
+    (displayln "Hello world")
+    (loop (add1 n))))
+]
