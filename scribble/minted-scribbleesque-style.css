@@ -1,20 +1,20 @@
-.highlight {
+.scribbleesque .highlight {
     font-size: 1rem;
 }
 
-.highlight a {
+.scribbleesque .highlight a {
     text-decoration: none;
 }
 
-.highlight .badlink {
+.scribbleesque .highlight .badlink {
     text-decoration: none;
 }
 
-.highlight pre {
-    overflow-y: scroll;
+.scribbleesque .highlight pre {
+    line-height: unset;
 }
 
-code.highlight {
+.scribbleesque code.highlight {
     margin: 0em;
     white-space: pre-wrap;
 }

@@ -19,3 +19,20 @@ Inductive Vec {A : Set} : nat -> Set :=
 }
 
 This is a Coq expression @mintinline["coq"]{cons 0 nil}.
+
+
+Here's some Racket using the Scribbleesque style
+@minted["racket" #:options '((style . scribbleesque))]{
+(begin
+  (let loop ([n 0])
+    (displayln "Hello world")
+    (loop (add1 n))))
+}
+
+with line numbers
+@minted["racket" #:options '((linenos . true) (style . scribbleesque))]{
+(begin
+(let loop ([n 0])
+(displayln "Hello world")
+(loop (add1 n))))
+}

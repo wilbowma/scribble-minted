@@ -27,6 +27,18 @@
 
 (define-runtime-path minted-tex-path "minted.tex")
 (define-runtime-path minted-css-path "minted.css")
+(define-runtime-path scribbleeqsue-minted-css-path "minted-scribbleesque-style.css")
+
+(define current-custom-styles
+  (make-parameter
+   `((scribbleesque . ,scribbleeqsue-minted-css-path))))
+
+(define (add-custom-style name file)
+  (current-custom-styles
+   (cons (cons name file) (current-custom-styles))))
+
+(define (custom-style? style)
+  (member style (dict-keys (current-custom-styles))))
 
 ;; Default value #f means "try to find the path and error if not found".
 (define current-pygmentize-path (make-parameter #f))
@@ -117,20 +129,25 @@
                         dir-prefix
                         style
                         pygmentize-style-file-suffix)])
-          (unless (member pygmentize-style-file style-extra-files)
-            (set-field! style-extra-files this
-                        (cons pygmentize-style-file style-extra-files)))
-          ;; setup style files in the dest-dir
-          (unless (file-exists? pygmentize-style-file)
-            (with-output-to-file pygmentize-style-file
-              (thunk
-               ; format is polymorphic to-string
-               (system*-maybe pygmentize-bin "-S" (format "~a" style)
-                              "-f" pygmentize-format
-                              ; Use style name as an extra CSS selector to
-                              ; support multiple styles in HTML
-                              "-a" (format ".~a" style)
-                              "-O" (format "commandprefix=PY~a" style)))))))
+
+          (if (custom-style? style)
+              (set-field! style-extra-files this
+                          (cons scribbleeqsue-minted-css-path style-extra-files))
+              (begin
+                (unless (member pygmentize-style-file style-extra-files)
+                  (set-field! style-extra-files this
+                              (cons pygmentize-style-file style-extra-files)))
+                ;; setup style files in the dest-dir
+                (unless (file-exists? pygmentize-style-file)
+                  (with-output-to-file pygmentize-style-file
+                    (thunk
+                     ; format is polymorphic to-string
+                     (system*-maybe pygmentize-bin "-S" (format "~a" style)
+                                    "-f" pygmentize-format
+                                    ; Use style name as an extra CSS selector to
+                                    ; support multiple styles in HTML
+                                    "-a" (format ".~a" style)
+                                    "-O" (format "commandprefix=PY~a" style)))))))))
       (super traverse-content i fp))
 
     (define/override (render-content i part ri)
@@ -159,7 +176,9 @@
                     "-O" (format "commandprefix=PY~a" (dict-ref options 'style 'default))
                     (for/fold ([ls '()])
                               ([p options])
-                      (list* "-O" (format "~a=~a" (car p) (cdr p)) ls)))))))
+                      (if (eq? (car p) 'style)
+                          ls
+                          (list* "-O" (format "~a=~a" (car p) (cdr p)) ls))))))))
              part ri))
           (super render-content i part ri)))))
 
