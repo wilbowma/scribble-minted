@@ -4,6 +4,7 @@
  (only-in rackunit require/expose)
  racket/runtime-path
  scribble/core
+ scribble/base
  scribble/latex-properties
  scribble/html-properties
  racket/function
@@ -12,6 +13,7 @@
  racket/list
  racket/string
  racket/class
+ racket/dict
  (only-in xml cdata))
 
 (require/expose scribble/run (current-render-mixin))
@@ -99,12 +101,6 @@
              ri)))]
         [else (error "Not sure how to mint-ify the renderer for" (super current-render-mode))]))
 
-    ; NOTE: Has support for multiple styles in a single document, but pygmentize
-    ; doesn't support this natively as it reuses names.
-    ; Could manually rewrite the generate CSS to add some kind of scopeing using
-    ; spans, e.g., by prefixing each of the generated classes, and adding the
-    ; prefix to the generated span/div.
-    ; This only works for html output, though.
     (define/override (traverse-content i fp)
       (when (and (element? i)
                  (let ([s (element-style i)])
@@ -129,8 +125,12 @@
             (with-output-to-file pygmentize-style-file
               (thunk
                ; format is polymorphic to-string
-               (system*-maybe pygmentize-bin "-S" (format "~a" style) "-f"
-                              pygmentize-format))))))
+               (system*-maybe pygmentize-bin "-S" (format "~a" style)
+                              "-f" pygmentize-format
+                              ; Use style name as an extra CSS selector to
+                              ; support multiple styles in HTML
+                              "-a" (format ".~a" style)
+                              "-O" (format "commandprefix=PY~a" style)))))))
       (super traverse-content i fp))
 
     (define/override (render-content i part ri)
@@ -156,6 +156,7 @@
                     (cdr (maybe-assoc 'lang (style-properties (element-style i))))
                     "-f"
                     pygmentize-format
+                    "-O" (format "commandprefix=PY~a" (dict-ref options 'style 'default))
                     (for/fold ([ls '()])
                               ([p options])
                       (list* "-O" (format "~a=~a" (car p) (cdr p)) ls)))))))
@@ -191,10 +192,14 @@
           '()))))
 
 (define (minted lang #:options [options '()] . code)
-  (element
-   (make-style "ScrbMint"
-               (list* `(lang . ,lang) `(mt-options . ,options) (minted-style-props)))
-   code))
+  ;; Wrap in extra style selector
+  (paragraph
+   (make-style (format "~a" (dict-ref options 'style 'default))
+               (list 'div 'never-indents))
+   (element
+    (make-style "ScrbMint"
+                (list* `(lang . ,lang) `(mt-options . ,options) (minted-style-props)))
+    code)))
 
 ;; TODO: Probably want some intermediate between inline and minted that allows
 ;; boxed, but in a scenario where the caller has control over the preceding
@@ -212,8 +217,11 @@
 
 (define (mintinline lang #:options [options '()] . code)
   (element
+   (make-style (format "~a" (dict-ref options 'style 'default))
+               '())
+   (element
    (make-style "ScrbMintInline"
                (list* `(lang . ,lang)
                       `(mt-options . ,(append inline-options options))
                       (minted-style-props)))
-   code))
+   code)))
