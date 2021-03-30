@@ -42,12 +42,3 @@ See pretty code!
 `raco pkg install scribble-minted`
 
 You must have `pygmentize` installed and in your `PATH`.
-
-
-## NB
-Note that the `style` option affects the style of everything typeset in the
-page due to limitations in Pygmentize.
-I'll eventually work around this to make it scoped to `@minted` call, allowing
-multiple styles in the same document.
-I recommend you avoid it and just use `current-pygmentize-default-style` for
-now.

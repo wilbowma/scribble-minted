@@ -1,0 +1,105 @@
+.highlight {
+    font-size: 1rem;
+}
+
+.highlight a {
+    text-decoration: none;
+}
+
+.highlight .badlink {
+    text-decoration: none;
+}
+
+.highlight pre {
+    overflow-y: scroll;
+}
+
+code.highlight {
+    margin: 0em;
+    white-space: pre-wrap;
+}
+
+/* normal text like: f(x) */
+.scribbleesque .nx {
+    color: #000000 !important;
+}
+
+/* string literals like: 'asdf' */
+.scribbleesque .s1 {
+    color: #228b22 !important;
+}
+
+/* string literals like: "asdf" */
+.scribbleesque .s2 {
+    color: #228b22 !important;
+}
+
+/* More strings, like in backticks: `asdf` */
+.scribbleesque .sb {
+    color: #228b22 !important;
+}
+
+/* int literals *and* line numbers like: 3 */
+.scribbleesque .mi {
+    color: #228b22 !important;
+}
+
+/* float literals *and* line numbers like: 3 */
+.scribbleesque .mf {
+    color: #228b22 !important;
+}
+
+/* int literals like: 0xdeadbeef */
+.scribbleesque .mh {
+    color: #228b22 !important;
+}
+
+/* literals like: true, false, null */
+.scribbleesque .kc {
+    color: #228b22 !important;
+}
+
+/* parens, like: []() */
+.scribbleesque .p {
+    color: #843c24 !important;
+}
+
+/* template brackets within backticks, like: `${a}`*/
+.scribbleesque .si {
+    color: #843c24 !important;
+}
+
+/* declaration keywords like: var, export, const */
+.scribbleesque .kd {
+    color: #843c24 !important;
+}
+
+/* operators, like: = */
+.scribbleesque .o {
+    color: #0000af !important;
+}
+
+/* Name.Builtin. Special known idents like: Reach, UInt */
+.scribbleesque .nb {
+    color: #0000af !important;
+}
+
+/* reserved keywords like: enum? */
+.scribbleesque .kr {
+    color: #960096 !important;
+}
+
+/* control keywords like: return */
+.scribbleesque .k {
+    color: #960096 !important;
+}
+
+/* single-line comment, like: // */
+.scribbleesque .c1 {
+    color: #c2741f !important;
+}
+
+/* multi-line comment, like this. */
+.scribbleesque .cm {
+    color: #c2741f !important;
+}
