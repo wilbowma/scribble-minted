@@ -21,9 +21,9 @@
  current-pygmentize-path
  current-pygmentize-default-style)
 
-(define-runtime-path minted-tex-path "minted.tex")
-(define-runtime-path minted-css-path "minted.css")
-(define-runtime-path scribbleeqsue-minted-css-path "minted-scribbleesque-style.css")
+(define-runtime-path minted-tex-path "minted/minted.tex")
+(define-runtime-path minted-css-path "minted/minted.css")
+(define-runtime-path scribbleeqsue-minted-css-path "minted/minted-scribbleesque-style.css")
 
 (define current-custom-styles
   (make-parameter

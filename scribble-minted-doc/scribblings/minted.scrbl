@@ -3,9 +3,11 @@
 @(require
   scribble/minted
   (for-label
+   scribble/core
    scribble/decode
    scribble/minted
    racket/base
+   racket/dict
    racket/contract))
 
 @title{Minted for Scribble}
