@@ -132,7 +132,7 @@
 
           (if (custom-style? style)
               (set-field! style-extra-files this
-                          (cons scribbleeqsue-minted-css-path style-extra-files))
+                          (cons (dict-ref (current-custom-styles) style) style-extra-files))
               (begin
                 (unless (member pygmentize-style-file style-extra-files)
                   (set-field! style-extra-files this
