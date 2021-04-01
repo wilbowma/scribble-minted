@@ -173,7 +173,7 @@
                     (cdr (maybe-assoc 'lang (style-properties (element-style i))))
                     "-f"
                     pygmentize-format
-                    "-O" (format "commandprefix=PY~a" (dict-ref options 'style 'default))
+                    "-O" (format "commandprefix=PY~a" (dict-ref options 'style (current-pygmentize-default-style)))
                     (for/fold ([ls '()])
                               ([p options])
                       (if (eq? (car p) 'style)
@@ -213,7 +213,7 @@
 (define (minted lang #:options [options '()] . code)
   ;; Wrap in extra style selector
   (paragraph
-   (make-style (format "~a" (dict-ref options 'style 'default))
+   (make-style (format "~a" (dict-ref options 'style (current-pygmentize-default-style)))
                (list 'div 'never-indents))
    (element
     (make-style "ScrbMint"
@@ -236,7 +236,7 @@
 
 (define (mintinline lang #:options [options '()] . code)
   (element
-   (make-style (format "~a" (dict-ref options 'style 'default))
+   (make-style (format "~a" (dict-ref options 'style (current-pygmentize-default-style)))
                '())
    (element
    (make-style "ScrbMintInline"
