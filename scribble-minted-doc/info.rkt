@@ -5,7 +5,8 @@
 (define build-deps
   '("scribble-lib"
     "scribble-minted-lib"
-    "racket-doc"))
+    "racket-doc"
+    "scribble-doc"))
 
 (define deps '("base"))
 (define pkg-desc "Documentation for scribble-minted")
