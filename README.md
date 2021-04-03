@@ -1,9 +1,6 @@
 # scribble/minted
 
 A small Scribble library with support for rendering code using `pygmentize`.
-This library hijacks Scribble to add a mixin to the `current-render-mixin`
-that pre-processes certain elements using `pygmentize` to get pretty code
-typesetting.
 These elements can be added using the `minted` and `mintinline` commands from
 this library.
 This mixin supports the LaTeX, PDF, and HTML backends.
