@@ -2,6 +2,10 @@
     margin-bottom: 1em;
 }
 
+.SIntrapara .highlight {
+    margin-bottom: 0em;
+}
+
 .highlight-inline {
     margin: 0em;
     white-space: pre-wrap;
