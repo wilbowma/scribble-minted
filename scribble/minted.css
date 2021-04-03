@@ -1,3 +1,7 @@
+.highlight {
+    margin-bottom: 1em;
+}
+
 .highlight-inline {
     margin: 0em;
     white-space: pre-wrap;
