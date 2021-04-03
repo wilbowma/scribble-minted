@@ -27,7 +27,8 @@
 
 (define current-custom-styles
   (make-parameter
-   `((scribbleesque . ,scribbleeqsue-minted-css-path))))
+   `((scribbleesque . ,(list
+                        (css-style-addition scribbleeqsue-minted-css-path))))))
 
 (define (add-custom-style name file)
   (current-custom-styles
@@ -81,9 +82,9 @@
                     style
                     style-file-suffix)])
 
-      (make-addition
-       (if (custom-style? style)
-           (dict-ref (current-custom-styles) style)
+      (if (custom-style? style)
+          (dict-ref (current-custom-styles) style)
+          (make-addition
            (begin
              (unless (file-exists? pygmentize-style-file)
                (with-output-to-file pygmentize-style-file
