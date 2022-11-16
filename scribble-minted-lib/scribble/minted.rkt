@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require
+ racket/contract
  (only-in rackunit require/expose)
  racket/runtime-path
  scribble/core
@@ -16,8 +17,10 @@
  (only-in xml string->xexpr cdata))
 
 (provide
- minted
- mintinline
+ (contract-out
+  [minted (->* ((or/c string? symbol?)) (#:options dict?) #:rest (listof string?) any/c)]
+  [mintinline (->* ((or/c string? symbol?)) (#:options dict?) #:rest (listof string?) any/c)]
+  [minted-file (->* ((or/c string? symbol?) path-string?) (#:options dict?) any/c)])
  current-pygmentize-path
  current-pygmentize-default-style)
 
@@ -99,10 +102,31 @@
              pygmentize-style-file))))))
 
 (define (render-pygmentize pygmentize-format style contents)
-  (let ([options (cdr (maybe-assoc 'mt-options (style-properties style)))])
+  (let* ([options (cdr (maybe-assoc 'mt-options (style-properties style)))]
+         ;; if no initial line number, start at firstline
+         [options (if (not (dict-ref options 'linenostart #f))
+                      (dict-set options 'linenostart (dict-ref options 'firstline 1))
+                      options)])
     (with-output-to-string
       (thunk
-       (with-input-from-string (apply string-append contents)
+       (with-input-from-string
+         (let* ([lines contents]
+                [firstline (dict-ref options 'firstline 1)]
+                [lastline (dict-ref options 'lastline (add1 (count (curry equal? "\n") lines)))]
+                [i 1])
+           (string-join
+            (reverse
+             ;; NOTE: could be slightly easier for for/list and #:do, but that
+             ;; requires 8.4
+             (for/fold ([r '()])
+                       ([line lines])
+               (begin0
+                   (if (<= firstline i lastline)
+                       (cons line r)
+                       r)
+                 (when (equal? "\n" line)
+                   (set! i (add1 i))))))
+            ""))
          (thunk
           (apply
            system*-maybe
@@ -198,3 +222,7 @@
                  `(lang . ,lang)
                  `(mt-options . ,(append inline-options options))))
     code)))
+
+(define (minted-file lang #:options [options '()] fn)
+  (with-input-from-file fn
+    (thunk (apply minted lang #:options options (add-between (port->lines) "\n")))))
