@@ -52,8 +52,8 @@ Other options, such as @tt{linenos} and @tt{style}, can be used to alter the
 output. See @tt{pygmentize} documentation for more details of standard options.
 
 There are two options that aren't supported by @tt{pygmentize} directly:
-@tt{firstline} and @tt{lastline}, limit how which lines are displayed (1-indexed).
-These work as in the LaTeX package.
+@tt{firstline} and @tt{lastline}.
+These limit which lines are displayed (1-indexed), and work as in the LaTeX package.
 By default, the @tt{firstline} also adjustes the @tt{linenostart} if it has no other value.
 
 For example,
