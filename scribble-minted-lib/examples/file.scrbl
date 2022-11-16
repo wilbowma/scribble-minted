@@ -8,7 +8,7 @@
 
 @; Or specify style as an option (not actually locally scoped, though)
 @minted-file["coq" #:options '((linenos . true) (style . colorful) (firstline . 2) (lastline . 5))
-"/tmp/test.v"
+"test.v"
 ]
 
 
